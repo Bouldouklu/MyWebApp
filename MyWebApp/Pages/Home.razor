@@ -44,7 +44,7 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="mb-3">
                                 <label for="brewType" class="form-label">Brew Type</label>
                                 <InputSelect id="brewType" class="form-control" @bind-Value="newCoffeeEntry.BrewType">
@@ -57,6 +57,29 @@
                                 <ValidationMessage For="@(() => newCoffeeEntry.BrewType)" />
                             </div>
                         </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="grindSetting" class="form-label">Grind Setting</label>
+                                <InputNumber id="grindSetting" class="form-control" @bind-Value="newCoffeeEntry.GrindSetting" placeholder="8-24" />
+                                <ValidationMessage For="@(() => newCoffeeEntry.GrindSetting)" />
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Brew Time</label>
+                                <div class="d-flex align-items-center">
+                                    <InputNumber class="form-control me-2" @bind-Value="newCoffeeEntry.BrewTimeMinutes" placeholder="Min" style="max-width: 60px;" />
+                                    <span class="me-2">:</span>
+                                    <InputNumber class="form-control" @bind-Value="newCoffeeEntry.BrewTimeSeconds" placeholder="Sec" style="max-width: 60px;" />
+                                </div>
+                                <small class="text-muted">mm:ss</small>
+                                <ValidationMessage For="@(() => newCoffeeEntry.BrewTimeMinutes)" />
+                                <ValidationMessage For="@(() => newCoffeeEntry.BrewTimeSeconds)" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label">Rating</label>
@@ -73,92 +96,49 @@
                                 <ValidationMessage For="@(() => newCoffeeEntry.Rating)" />
                             </div>
                         </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between align-items-center">
-                        <button type="submit" class="btn btn-primary">Add Coffee Entry</button>
-                        @if (lastEntryAdded)
-                        {
-                            <div class="text-success">
-                                <i class="bi bi-check-circle"></i> Coffee entry added successfully!
-                            </div>
-                        }
+                        <div class="col-md-6 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Add Coffee Entry</button>
+                        </div>
                     </div>
                 </EditForm>
+
+                @if (lastEntryAdded)
+                {
+                    <div class="alert alert-success mt-3" role="alert">
+                        ☕ Coffee entry added successfully!
+                    </div>
+                }
             </div>
         </div>
     </div>
     
     <div class="col-md-4">
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>📍 Current Weather</h5>
-            </div>
-            <div class="card-body">
-                @if (currentWeather != null)
-                {
-                    <div class="text-center">
-                        <div class="display-6">@WeatherService.GetWeatherIcon(currentWeather.WeatherCode)</div>
-                        <h4>@Math.Round(currentWeather.Temperature, 1)°C</h4>
-                        <p class="text-muted mb-2">@currentWeather.WeatherDescription</p>
-                        <small class="text-muted">@currentWeather.Location</small>
-                        
-                        <hr class="my-2" />
-                        
-                        <div class="row text-center">
-                            <div class="col-4">
-                                <small class="text-muted d-block">Humidity</small>
-                                <strong>@currentWeather.Humidity%</strong>
-                            </div>
-                            <div class="col-4">
-                                <small class="text-muted d-block">Wind</small>
-                                <strong>@Math.Round(currentWeather.WindSpeed, 1) km/h</strong>
-                            </div>
-                            <div class="col-4">
-                                <a href="/weather" class="btn btn-outline-primary btn-sm">7-Day</a>
-                            </div>
-                        </div>
-                    </div>
-                }
-                else if (loadingWeather)
-                {
-                    <div class="text-center">
-                        <div class="spinner-border spinner-border-sm" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 mb-0">Loading weather...</p>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center text-muted">
-                        <p>Weather data unavailable</p>
-                        <button class="btn btn-outline-secondary btn-sm" @onclick="LoadWeatherData">
-                            Try Again
-                        </button>
-                    </div>
-                }
-            </div>
-        </div>
-        
         <div class="card">
             <div class="card-header">
-                <h5>☕ Today's Stats</h5>
+                <h5>☕ Today's Coffee Stats</h5>
             </div>
             <div class="card-body">
-                @if (CoffeeService.GetTodaysCoffees().Any())
-                {
+                @{
                     var todaysCoffees = CoffeeService.GetTodaysCoffees();
-                    <p><strong>Coffees today:</strong> @todaysCoffees.Count()</p>
-                    <p><strong>Total volume:</strong> @todaysCoffees.Sum(c => c.Volume) ml</p>
-                    <p><strong>Average rating:</strong> @todaysCoffees.Average(c => c.Rating).ToString("F1") ⭐</p>
+                }
+                
+                @if (todaysCoffees.Count > 0)
+                {
+                    <p class="mb-2"><strong>Cups today:</strong> @todaysCoffees.Count</p>
+                    <p class="mb-2"><strong>Total volume:</strong> @todaysCoffees.Sum(c => c.Volume) ml</p>
+                    <p class="mb-2"><strong>Average rating:</strong> @todaysCoffees.Average(c => c.Rating).ToString("F1") ⭐</p>
+                    <p class="mb-2"><strong>Average grind:</strong> @todaysCoffees.Average(c => c.GrindSetting).ToString("F1")</p>
+                    <p class="mb-3"><strong>Average brew time:</strong> @TimeSpan.FromSeconds(todaysCoffees.Average(c => c.TotalBrewTimeSeconds)).ToString(@"m\:ss")</p>
                     
                     <hr />
                     <h6>Recent entries:</h6>
                     @foreach (var coffee in todaysCoffees.OrderByDescending(c => c.DateTime).Take(3))
                     {
-                        <div class="small mb-1">
+                        <div class="small mb-2 border-bottom pb-2">
                             <strong>@coffee.CoffeeName</strong> - @coffee.BrewType
+                            <div class="text-muted">
+                                Grind: @coffee.GrindSetting | Time: @coffee.FormattedBrewTime
+                            </div>
                             <div>
                                 @for (int i = 1; i <= coffee.Rating; i++)
                                 {
@@ -187,53 +167,32 @@
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">🎮 Latest Game Development News</h5>
-                <a href="/gamedev" class="btn btn-outline-primary btn-sm">View All →</a>
+                <a href="/gamedev" class="btn btn-outline-primary btn-sm">View All News</a>
             </div>
             <div class="card-body">
-                @if (latestGameDevNews?.Any() == true)
+                @if (loadingGameDevNews)
+                {
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <p class="text-center mt-2">Loading latest game development news...</p>
+                }
+                else if (latestGameDevNews != null && latestGameDevNews.Count > 0)
                 {
                     <div class="row">
-                        @foreach (var article in latestGameDevNews.Take(4))
+                        @foreach (var article in latestGameDevNews.Take(3))
                         {
-                            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 mb-3">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    @if (!string.IsNullOrEmpty(article.Thumbnail))
-                                    {
-                                        <img src="@article.Thumbnail" class="card-img-top" alt="@article.Title" style="height: 160px; object-fit: cover;" />
-                                    }
-                                    else
-                                    {
-                                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 160px;">
-                                            <span class="text-muted display-6">@GameDevNewsService.GetSourceIcon(article.Source)</span>
-                                        </div>
-                                    }
-                                    <div class="card-body p-3">
-                                        <h6 class="card-title">
-                                            <a href="@article.Link" target="_blank" class="text-decoration-none">
-                                                @(article.Title.Length > 45 ? article.Title.Substring(0, 45) + "..." : article.Title)
-                                            </a>
-                                        </h6>
-                                        
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge bg-@GetSourceColorForHome(article.Source)">
-                                                @GameDevNewsService.GetSourceIcon(article.Source) @article.Source
-                                            </span>
-                                        </div>
-                                        
-                                        <p class="card-text small text-muted">
-                                            @(article.Description.Length > 80 ? article.Description.Substring(0, 80) + "..." : article.Description)
-                                        </p>
-                                        
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div>
-                                                @if (article.Categories.Any())
-                                                {
-                                                    <span class="badge bg-secondary">
-                                                        @article.Categories.First()
-                                                    </span>
-                                                }
-                                            </div>
-                                            <small class="text-muted">@GameDevNewsService.GetTimeAgo(article.PublishDate)</small>
+                            <div class="col-md-4 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body d-flex flex-column">
+                                        <span class="badge bg-@GetSourceColorForHome(article.Source) mb-2 align-self-start">@article.Source</span>
+                                        <h6 class="card-title">@article.Title</h6>
+                                        <p class="card-text small text-muted flex-grow-1">@article.Description</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-auto">
+                                            <small class="text-muted">@article.PublishDate.ToString("MMM dd")</small>
+                                            <a href="@article.Link" class="btn btn-outline-primary btn-sm" target="_blank">Read More</a>
                                         </div>
                                     </div>
                                 </div>
@@ -241,92 +200,10 @@
                         }
                     </div>
                 }
-                else if (loadingGameDevNews)
-                {
-                    <div class="text-center">
-                        <div class="spinner-border spinner-border-sm" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <span class="ms-2">Loading latest game development news...</span>
-                    </div>
-                }
                 else
                 {
-                    <div class="text-center text-muted">
-                        <p>Unable to load game development news at the moment</p>
-                        <p class="small">Check console for debug info</p>
-                        <button class="btn btn-outline-secondary btn-sm" @onclick="LoadLatestGameDevNews">
-                            🔄 Retry
-                        </button>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Latest News Section -->
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">📰 Latest TechSpot News</h5>
-                <a href="/news" class="btn btn-outline-primary btn-sm">View All →</a>
-            </div>
-            <div class="card-body">
-                @if (latestNews?.Any() == true)
-                {
-                    <div class="row">
-                        @foreach (var article in latestNews.Take(6))
-                        {
-                            <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
-                                <div class="card h-100 border-0 shadow-sm">
-                                    @if (!string.IsNullOrEmpty(article.Thumbnail))
-                                    {
-                                        <img src="@article.Thumbnail" class="card-img-top" alt="@article.Title" style="height: 120px; object-fit: cover;" />
-                                    }
-                                    <div class="card-body p-3">
-                                        <h6 class="card-title">
-                                            <a href="@article.Link" target="_blank" class="text-decoration-none">
-                                                @(article.Title.Length > 50 ? article.Title.Substring(0, 50) + "..." : article.Title)
-                                            </a>
-                                        </h6>
-                                        <p class="card-text small text-muted">
-                                            @(article.Description.Length > 60 ? article.Description.Substring(0, 60) + "..." : article.Description)
-                                        </p>
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">@NewsService.GetTimeAgo(article.PublishDate)</small>
-                                            @if (article.Categories.Any())
-                                            {
-                                                <span class="badge bg-secondary">
-                                                    @NewsService.GetCategoryIcon(article.Categories.First())
-                                                </span>
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else if (loadingNews)
-                {
-                    <div class="text-center">
-                        <div class="spinner-border spinner-border-sm" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <span class="ms-2">Loading latest tech news...</span>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center text-muted">
-                        <p>Unable to load news at the moment</p>
-                        <p class="small">Check console for debug info</p>
-                        <button class="btn btn-outline-secondary btn-sm" @onclick="LoadLatestNews">
-                            🔄 Retry
-                        </button>
-                    </div>
+                    <p class="text-muted">No game development news available at the moment.</p>
+                    <p class="small">Check back later for the latest updates!</p>
                 }
             </div>
         </div>
@@ -335,64 +212,16 @@
 
 @code {
     [Inject] public CoffeeService CoffeeService { get; set; } = default!;
-    [Inject] public WeatherService WeatherService { get; set; } = default!;
-    [Inject] public NewsService NewsService { get; set; } = default!;
     [Inject] public GameDevNewsService GameDevNewsService { get; set; } = default!;
     
     private CoffeeEntry newCoffeeEntry = new();
     private bool lastEntryAdded = false;
-    private CurrentWeather? currentWeather;
-    private bool loadingWeather = true;
-    private List<NewsArticle> latestNews = new();
-    private bool loadingNews = true;
-    private List<GameDevArticle> latestGameDevNews = new();
     private bool loadingGameDevNews = true;
+    private List<GameDevArticle>? latestGameDevNews;
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.WhenAll(LoadWeatherData(), LoadLatestNews(), LoadLatestGameDevNews());
-    }
-
-    private async Task LoadWeatherData()
-    {
-        loadingWeather = true;
-        StateHasChanged();
-        
-        currentWeather = await WeatherService.GetCurrentWeatherAsync();
-        loadingWeather = false;
-        StateHasChanged();
-    }
-
-    private async Task LoadLatestNews()
-    {
-        try
-        {
-            loadingNews = true;
-            StateHasChanged();
-            
-            Console.WriteLine("Starting to load latest news...");
-            var news = await NewsService.GetLatestNewsAsync(6);
-            Console.WriteLine($"Received {news?.Count ?? 0} news articles");
-            
-            if (news != null)
-            {
-                latestNews = news;
-                Console.WriteLine("News loaded successfully");
-            }
-            else
-            {
-                Console.WriteLine("News was null");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error loading latest news: {ex.Message}");
-        }
-        finally
-        {
-            loadingNews = false;
-            StateHasChanged();
-        }
+        await LoadLatestGameDevNews();
     }
 
     private async Task LoadLatestGameDevNews()
@@ -400,11 +229,8 @@
         try
         {
             loadingGameDevNews = true;
-            StateHasChanged();
-            
-            Console.WriteLine("Starting to load latest game dev news...");
-            var news = await GameDevNewsService.GetAllGameDevNewsAsync(4);
-            Console.WriteLine($"Received {news?.Count ?? 0} game dev articles");
+            var news = await GameDevNewsService.GetAllGameDevNewsAsync(3);
+            Console.WriteLine($"Loaded {news?.Count ?? 0} game dev articles");
             
             if (news != null)
             {
@@ -444,6 +270,9 @@
                 Volume = newCoffeeEntry.Volume,
                 BrewType = newCoffeeEntry.BrewType,
                 Rating = newCoffeeEntry.Rating,
+                GrindSetting = newCoffeeEntry.GrindSetting,
+                BrewTimeMinutes = newCoffeeEntry.BrewTimeMinutes,
+                BrewTimeSeconds = newCoffeeEntry.BrewTimeSeconds,
                 DateTime = DateTime.Now
             };
 
@@ -466,7 +295,10 @@
                entry.Temperature > 0 &&
                entry.Volume > 0 &&
                !string.IsNullOrWhiteSpace(entry.BrewType) &&
-               entry.Rating > 0;
+               entry.Rating > 0 &&
+               entry.GrindSetting >= 8 && entry.GrindSetting <= 24 &&
+               entry.BrewTimeMinutes >= 0 && entry.BrewTimeMinutes <= 59 &&
+               entry.BrewTimeSeconds >= 0 && entry.BrewTimeSeconds <= 59;
     }
 
     private string GetSourceColorForHome(string source)

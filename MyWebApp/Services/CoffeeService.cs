@@ -69,6 +69,24 @@ namespace MyWebApp.Services
         [Range(1, 5, ErrorMessage = "Please rate the coffee from 1 to 5 stars")]
         public int Rating { get; set; }
         
+        [Required]
+        [Range(8, 24, ErrorMessage = "Grind setting must be between 8 and 24")]
+        public int GrindSetting { get; set; }
+        
+        [Required]
+        [Range(0, 59, ErrorMessage = "Brew time minutes must be between 0 and 59")]
+        public int BrewTimeMinutes { get; set; }
+        
+        [Required]
+        [Range(0, 59, ErrorMessage = "Brew time seconds must be between 0 and 59")]
+        public int BrewTimeSeconds { get; set; }
+        
         public DateTime DateTime { get; set; }
+        
+        // Helper property to get total brew time in seconds
+        public int TotalBrewTimeSeconds => BrewTimeMinutes * 60 + BrewTimeSeconds;
+        
+        // Helper property to format brew time as string
+        public string FormattedBrewTime => $"{BrewTimeMinutes}:{BrewTimeSeconds:D2}";
     }
 }
