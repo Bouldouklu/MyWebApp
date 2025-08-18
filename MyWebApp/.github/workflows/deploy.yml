@@ -20,8 +20,8 @@ jobs:
     - name: Publish .NET Core Project
       run: dotnet publish MyWebApp/MyWebApp.csproj -c Release -o release --nologo
 
-    - name: Change base-tag in index.html from / to repository name
-      run: sed -i 's/<base href="\/" \/>/<base href="\/${{ github.event.repository.name }}\/" \/>/g' release/wwwroot/index.html
+    - name: Change base-tag in index.html from / to MyWebApp
+      run: sed -i 's/<base href="\/" \/>/<base href="\/MyWebApp\/" \/>/g' release/wwwroot/index.html
 
     - name: Copy index.html to 404.html
       run: cp release/wwwroot/index.html release/wwwroot/404.html
