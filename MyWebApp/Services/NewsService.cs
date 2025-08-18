@@ -214,6 +214,24 @@ namespace MyWebApp.Services
             return DateTime.Now;
         }
 
+        private static DateTime ParseToptalDate(string? dateString)
+        {
+            if (string.IsNullOrWhiteSpace(dateString))
+                return DateTime.Now;
+
+            try
+            {
+                if (DateTime.TryParse(dateString, out var date))
+                    return date;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error parsing Toptal date '{dateString}': {ex.Message}");
+            }
+
+            return DateTime.Now;
+        }
+
         private static List<string> ExtractCategories(List<string>? categories)
         {
             if (categories == null || !categories.Any())
@@ -275,22 +293,10 @@ namespace MyWebApp.Services
             return ""; // No thumbnail found
         }
 
-        private static DateTime ParseToptalDate(string? dateString)
+        private static bool IsImageUrl(string url)
         {
-            if (string.IsNullOrWhiteSpace(dateString))
-                return DateTime.Now;
-
-            try
-            {
-                if (DateTime.TryParse(dateString, out var date))
-                    return date;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error parsing Toptal date '{dateString}': {ex.Message}");
-            }
-
-            return DateTime.Now;
+            var imageExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg" };
+            return imageExtensions.Any(ext => url.ToLower().Contains(ext));
         }
 
         public static string GetCategoryIcon(string category)
@@ -394,6 +400,31 @@ namespace MyWebApp.Services
         
         [JsonPropertyName("categories")]
         public List<string>? Categories { get; set; }
+    }
+
+    // Models for Toptal fallback service
+    public class ToptalFeedResponse
+    {
+        [JsonPropertyName("items")]
+        public List<ToptalItem>? Items { get; set; }
+    }
+
+    public class ToptalItem
+    {
+        [JsonPropertyName("title")]
+        public string? Title { get; set; }
+        
+        [JsonPropertyName("url")]
+        public string? Url { get; set; }
+        
+        [JsonPropertyName("summary")]
+        public string? Summary { get; set; }
+        
+        [JsonPropertyName("content_text")]
+        public string? ContentText { get; set; }
+        
+        [JsonPropertyName("date_published")]
+        public string? DatePublished { get; set; }
     }
 
     // Models for our application
