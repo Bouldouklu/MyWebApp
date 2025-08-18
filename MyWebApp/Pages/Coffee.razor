@@ -1,0 +1,189 @@
+@page "/coffee"
+@using System.ComponentModel.DataAnnotations
+@using MyWebApp.Services
+
+<PageTitle>Coffee Log</PageTitle>
+
+<h1>Coffee Log</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <h3>Add New Coffee Entry</h3>
+        
+        <EditForm Model="@newCoffeeEntry" OnValidSubmit="@AddCoffeeEntry">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="coffeeName" class="form-label">Coffee Name</label>
+                <InputText id="coffeeName" class="form-control" @bind-Value="newCoffeeEntry.CoffeeName" />
+                <ValidationMessage For="@(() => newCoffeeEntry.CoffeeName)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="temperature" class="form-label">Temperature (°C)</label>
+                <InputNumber id="temperature" class="form-control" @bind-Value="newCoffeeEntry.Temperature" />
+                <ValidationMessage For="@(() => newCoffeeEntry.Temperature)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="volume" class="form-label">Volume (ml)</label>
+                <InputNumber id="volume" class="form-control" @bind-Value="newCoffeeEntry.Volume" />
+                <ValidationMessage For="@(() => newCoffeeEntry.Volume)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="brewType" class="form-label">Brew Type</label>
+                <InputSelect id="brewType" class="form-control" @bind-Value="newCoffeeEntry.BrewType">
+                    <option value="">Select brew type...</option>
+                    <option value="V60">V60</option>
+                    <option value="AeroPress">AeroPress</option>
+                    <option value="French Press">French Press</option>
+                    <option value="Mokapot">Mokapot</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => newCoffeeEntry.BrewType)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Rating</label>
+                <div class="star-rating">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        int starValue = i;
+                        <span class="star @(starValue <= newCoffeeEntry.Rating ? "filled" : "")" 
+                              @onclick="() => SetRating(starValue)">
+                            ★
+                        </span>
+                    }
+                </div>
+                <ValidationMessage For="@(() => newCoffeeEntry.Rating)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add Coffee Entry</button>
+        </EditForm>
+    </div>
+</div>
+
+<hr class="my-4" />
+
+<h3>Coffee History</h3>
+
+@if (coffeeEntries.Count == 0)
+{
+    <p><em>No coffee entries yet. Add your first one above!</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Coffee Name</th>
+                <th>Temperature (°C)</th>
+                <th>Volume (ml)</th>
+                <th>Brew Type</th>
+                <th>Rating</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in coffeeEntries.OrderByDescending(c => c.DateTime))
+            {
+                <tr>
+                    <td>@entry.DateTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@entry.CoffeeName</td>
+                    <td>@entry.Temperature</td>
+                    <td>@entry.Volume</td>
+                    <td>@entry.BrewType</td>
+                    <td>
+                        <div class="star-display">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <span class="star @(i <= entry.Rating ? "filled" : "")">★</span>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-danger" @onclick="() => DeleteCoffeeEntry(entry)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+    <div class="mt-3">
+        <p><strong>Total entries:</strong> @coffeeEntries.Count</p>
+        <p><strong>Total coffee consumed:</strong> @coffeeEntries.Sum(c => c.Volume) ml</p>
+        @if (coffeeEntries.Count > 0)
+        {
+            <p><strong>Average rating:</strong> @coffeeEntries.Average(c => c.Rating).ToString("F1") stars</p>
+        }
+    </div>
+}
+
+@code {
+    [Inject] public CoffeeService CoffeeService { get; set; } = default!;
+    
+    private CoffeeEntry newCoffeeEntry = new();
+    private List<CoffeeEntry> coffeeEntries = new();
+
+    protected override void OnInitialized()
+    {
+        coffeeEntries = CoffeeService.GetAllCoffees();
+        CoffeeService.OnCoffeeListChanged += RefreshCoffeeList;
+    }
+
+    private void RefreshCoffeeList()
+    {
+        coffeeEntries = CoffeeService.GetAllCoffees();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SetRating(int rating)
+    {
+        newCoffeeEntry.Rating = rating;
+    }
+
+    private void AddCoffeeEntry()
+    {
+        if (IsValidEntry(newCoffeeEntry))
+        {
+            var entry = new CoffeeEntry
+            {
+                Id = Guid.NewGuid(),
+                CoffeeName = newCoffeeEntry.CoffeeName,
+                Temperature = newCoffeeEntry.Temperature,
+                Volume = newCoffeeEntry.Volume,
+                BrewType = newCoffeeEntry.BrewType,
+                Rating = newCoffeeEntry.Rating,
+                DateTime = DateTime.Now
+            };
+
+            CoffeeService.AddCoffee(entry);
+            
+            // Reset the form
+            newCoffeeEntry = new CoffeeEntry();
+        }
+    }
+
+    private void DeleteCoffeeEntry(CoffeeEntry entry)
+    {
+        CoffeeService.RemoveCoffee(entry);
+    }
+
+    private bool IsValidEntry(CoffeeEntry entry)
+    {
+        return !string.IsNullOrWhiteSpace(entry.CoffeeName) &&
+               entry.Temperature > 0 &&
+               entry.Volume > 0 &&
+               !string.IsNullOrWhiteSpace(entry.BrewType) &&
+               entry.Rating > 0;
+    }
+
+    public void Dispose()
+    {
+        CoffeeService.OnCoffeeListChanged -= RefreshCoffeeList;
+    }
+}

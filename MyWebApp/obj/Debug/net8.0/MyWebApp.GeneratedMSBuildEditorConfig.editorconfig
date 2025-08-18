@@ -26,8 +26,8 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
-[/workspaces/MyWebApp/MyWebApp/Pages/Counter.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ291bnRlci5yYXpvcg==
+[/workspaces/MyWebApp/MyWebApp/Pages/Coffee.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQ29mZmVlLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [/workspaces/MyWebApp/MyWebApp/Pages/Home.razor]

@@ -101,3 +101,40 @@ a, .btn-link {
 code {
     color: #c02d76;
 }
+
+/* Add this to your wwwroot/css/app.css file */
+
+.star-rating {
+    display: flex;
+    gap: 2px;
+    margin-top: 5px;
+}
+
+.star {
+    font-size: 1.5rem;
+    color: #ddd;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.star.filled {
+    color: #ffc107;
+}
+
+.star:hover {
+    color: #ffc107;
+}
+
+.star-display {
+    display: flex;
+    gap: 2px;
+}
+
+.star-display .star {
+    font-size: 1rem;
+    cursor: default;
+}
+
+.star-display .star:hover {
+    color: #ffc107; /* Keep filled color on hover in display mode */
+}

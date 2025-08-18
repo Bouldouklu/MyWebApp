@@ -1,57 +1,209 @@
 ﻿@page "/weather"
-@inject HttpClient Http
+@using MyWebApp.Services
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Weather Forecast</PageTitle>
 
-<h1>Weather</h1>
+<h1>🌤️ 7-Day Weather Forecast</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
-@if (forecasts == null)
+@if (weeklyForecast != null)
 {
-    <p><em>Loading...</em></p>
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">📍 @weeklyForecast.Location</h4>
+                    <button class="btn btn-outline-primary btn-sm" @onclick="RefreshForecast">
+                        🔄 Refresh
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var day in weeklyForecast.DailyForecasts)
+                        {
+                            <div class="col-lg-3 col-md-4 col-sm-6 mb-3">
+                                <div class="card h-100 @(day.Date.Date == DateTime.Today ? "border-primary" : "")">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">
+                                            @if (day.Date.Date == DateTime.Today)
+                                            {
+                                                <span class="badge bg-primary">Today</span>
+                                            }
+                                            else
+                                            {
+                                                @day.Date.ToString("ddd, MMM d")
+                                            }
+                                        </h6>
+                                        
+                                        <div class="display-6 my-2">
+                                            @WeatherService.GetWeatherIcon(day.WeatherCode)
+                                        </div>
+                                        
+                                        <div class="temperature-range mb-2">
+                                            <span class="h5 text-danger">@Math.Round(day.MaxTemperature, 1)°</span>
+                                            <span class="text-muted mx-1">/</span>
+                                            <span class="text-primary">@Math.Round(day.MinTemperature, 1)°</span>
+                                        </div>
+                                        
+                                        <p class="card-text small text-muted mb-2">
+                                            @day.WeatherDescription
+                                        </p>
+                                        
+                                        <div class="small">
+                                            @if (day.PrecipitationSum > 0)
+                                            {
+                                                <div class="text-info">
+                                                    💧 @Math.Round(day.PrecipitationSum, 1) mm
+                                                </div>
+                                            }
+                                            <div class="text-muted">
+                                                💨 @Math.Round(day.MaxWindSpeed, 1) km/h
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weather Summary -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>📊 Week Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-danger">Highest</h6>
+                            <span class="h4">@Math.Round(weeklyForecast.DailyForecasts.Max(d => d.MaxTemperature), 1)°C</span>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-primary">Lowest</h6>
+                            <span class="h4">@Math.Round(weeklyForecast.DailyForecasts.Min(d => d.MinTemperature), 1)°C</span>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h6 class="text-info">Total Rain</h6>
+                            <span class="h5">@Math.Round(weeklyForecast.DailyForecasts.Sum(d => d.PrecipitationSum), 1) mm</span>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted">Avg Wind</h6>
+                            <span class="h5">@Math.Round(weeklyForecast.DailyForecasts.Average(d => d.MaxWindSpeed), 1) km/h</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🌦️ Weather Patterns</h5>
+                </div>
+                <div class="card-body">
+                    @{
+                        var rainyDays = weeklyForecast.DailyForecasts.Count(d => d.PrecipitationSum > 0);
+                        var sunnyDays = weeklyForecast.DailyForecasts.Count(d => d.WeatherCode <= 1);
+                        var cloudyDays = weeklyForecast.DailyForecasts.Count(d => d.WeatherCode >= 2 && d.WeatherCode <= 3);
+                    }
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>☀️ Sunny days</span>
+                            <span class="badge bg-warning">@sunnyDays</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>☁️ Cloudy days</span>
+                            <span class="badge bg-secondary">@cloudyDays</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>🌧️ Rainy days</span>
+                            <span class="badge bg-info">@rainyDays</span>
+                        </div>
+                    </div>
+                    
+                    <hr />
+                    
+                    <p class="small text-muted mb-0">
+                        <strong>Best day for outdoor activities:</strong>
+                        @{
+                            var bestDay = weeklyForecast.DailyForecasts
+                                .Where(d => d.PrecipitationSum == 0)
+                                .OrderBy(d => d.MaxWindSpeed)
+                                .FirstOrDefault();
+                        }
+                        @if (bestDay != null)
+                        {
+                            <span>@bestDay.Date.ToString("dddd")</span>
+                        }
+                        else
+                        {
+                            <span>Indoor activities recommended</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (loadingForecast)
+{
+    <div class="text-center my-5">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Loading 7-day forecast...</p>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var forecast in forecasts)
-            {
-                <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="text-center my-5">
+        <div class="alert alert-warning">
+            <h4>⚠️ Weather data unavailable</h4>
+            <p>Unable to load the weather forecast. Please check your internet connection and try again.</p>
+            <button class="btn btn-primary" @onclick="LoadForecastData">
+                🔄 Try Again
+            </button>
+        </div>
+    </div>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    [Inject] public WeatherService WeatherService { get; set; } = default!;
+    
+    private WeeklyForecast? weeklyForecast;
+    private bool loadingForecast = true;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("sample-data/weather.json");
+        await LoadForecastData();
     }
 
-    public class WeatherForecast
+    private async Task LoadForecastData()
     {
-        public DateOnly Date { get; set; }
+        loadingForecast = true;
+        StateHasChanged();
+        
+        weeklyForecast = await WeatherService.GetWeeklyForecastAsync();
+        loadingForecast = false;
+        StateHasChanged();
+    }
 
-        public int TemperatureC { get; set; }
-
-        public string? Summary { get; set; }
-
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    private async Task RefreshForecast()
+    {
+        await LoadForecastData();
     }
 }
