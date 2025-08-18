@@ -1030,3 +1030,7 @@
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/refint/MyWebApp.dll
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.pdb
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/ref/MyWebApp.dll
+/workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/service-worker-assets.js
+/workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/service-worker.js
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker/service-worker.js
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker-assets.js.build

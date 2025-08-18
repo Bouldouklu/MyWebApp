@@ -13,6 +13,14 @@
       "PackagePath": "staticwebassets/MyWebApp.styles.css"
     },
     {
+      "Id": "/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker-assets.js",
+      "PackagePath": "staticwebassets/service-worker-assets.js"
+    },
+    {
+      "Id": "/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker/service-worker.published.js",
+      "PackagePath": "staticwebassets/service-worker.js"
+    },
+    {
       "Id": "/workspaces/MyWebApp/MyWebApp/wwwroot/css/app.css",
       "PackagePath": "staticwebassets/css/app.css"
     },
@@ -35,6 +43,10 @@
     {
       "Id": "/workspaces/MyWebApp/MyWebApp/wwwroot/index.html",
       "PackagePath": "staticwebassets/index.html"
+    },
+    {
+      "Id": "/workspaces/MyWebApp/MyWebApp/wwwroot/manifest.json",
+      "PackagePath": "staticwebassets/manifest.json"
     },
     {
       "Id": "/workspaces/MyWebApp/MyWebApp/wwwroot/sample-data/weather.json",
