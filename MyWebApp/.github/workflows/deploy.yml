@@ -32,9 +32,12 @@ jobs:
     - name: Publish .NET Core Project
       run: dotnet publish MyWebApp/MyWebApp.csproj -c Release -o release --nologo
 
-    - name: Keep base-tag as root (GitHub Pages will serve from yourusername.github.io/MyWebApp/)
+    - name: Change base-tag in index.html to /MyWebApp/
       run: |
-        echo "Keeping base href as /"
+        echo "Before change:"
+        grep "<base" release/wwwroot/index.html
+        sed -i 's|<base href="/" />|<base href="/MyWebApp/" />|g' release/wwwroot/index.html
+        echo "After change:"
         grep "<base" release/wwwroot/index.html
 
     - name: Copy index.html to 404.html
