@@ -12,5 +12,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 // Register services
 builder.Services.AddSingleton<CoffeeService>();
 builder.Services.AddScoped<WeatherService>();
+builder.Services.AddScoped<NewsService>();
 
 await builder.Build().RunAsync();

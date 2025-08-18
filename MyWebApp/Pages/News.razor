@@ -1,0 +1,241 @@
+@page "/news"
+@using MyWebApp.Services
+
+<PageTitle>TechSpot News</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>📰 TechSpot News</h1>
+    <button class="btn btn-outline-primary" @onclick="RefreshNews" disabled="@loadingNews">
+        @if (loadingNews)
+        {
+            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+        }
+        else
+        {
+            <span>🔄</span>
+        }
+        Refresh
+    </button>
+</div>
+
+@if (newsArticles?.Any() == true)
+{
+    <div class="row">
+        @foreach (var article in newsArticles)
+        {
+            <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    @if (!string.IsNullOrEmpty(article.Thumbnail))
+                    {
+                        <img src="@article.Thumbnail" 
+                             class="card-img-top" 
+                             alt="@article.Title" 
+                             style="height: 200px; object-fit: cover;" />
+                    }
+                    else
+                    {
+                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <span class="text-muted display-4">📰</span>
+                        </div>
+                    }
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="@article.Link" target="_blank" class="text-decoration-none">
+                                @article.Title
+                            </a>
+                        </h5>
+                        
+                        <p class="card-text text-muted small flex-grow-1">
+                            @article.Description
+                        </p>
+                        
+                        <div class="mt-auto">
+                            @if (article.Categories.Any())
+                            {
+                                <div class="mb-2">
+                                    @foreach (var category in article.Categories.Take(2))
+                                    {
+                                        <span class="badge bg-secondary me-1">
+                                            @NewsService.GetCategoryIcon(category) @category
+                                        </span>
+                                    }
+                                </div>
+                            }
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    📅 @NewsService.GetTimeAgo(article.PublishDate)
+                                </small>
+                                <small class="text-muted">
+                                    ✍️ @article.Author
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="@article.Link" target="_blank" class="btn btn-primary btn-sm w-100">
+                            Read Article →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    
+    <!-- Load More Button -->
+    <div class="text-center mt-4">
+        <button class="btn btn-outline-secondary" @onclick="LoadMoreNews" disabled="@loadingMore">
+            @if (loadingMore)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <text>Loading</text>
+            }
+            else
+            {
+                <text>Load More Articles</text>
+            }
+        </button>
+    </div>
+    
+    <!-- News Stats -->
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📊 Articles Loaded</h5>
+                    <p class="card-text display-6">@newsArticles.Count</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">📈 Latest Article</h5>
+                    <p class="card-text">
+                        @if (newsArticles.Any())
+                        {
+                            @NewsService.GetTimeAgo(newsArticles.OrderByDescending(a => a.PublishDate).First().PublishDate)
+                        }
+                        else
+                        {
+                            <span>No articles</span>
+                        }
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">🔥 Top Categories</h5>
+                    <p class="card-text">
+                        @{
+                            var topCategories = newsArticles
+                                .SelectMany(a => a.Categories)
+                                .GroupBy(c => c)
+                                .OrderByDescending(g => g.Count())
+                                .Take(3)
+                                .Select(g => g.Key);
+                        }
+                        @string.Join(", ", topCategories)
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else if (loadingNews)
+{
+    <div class="text-center my-5">
+        <div class="spinner-border mb-3" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <h4>Loading TechSpot News...</h4>
+        <p class="text-muted">Fetching the latest tech articles for you</p>
+    </div>
+}
+else
+{
+    <div class="text-center my-5">
+        <div class="alert alert-warning">
+            <h4>📡 Unable to Load News</h4>
+            <p>We couldn't fetch the latest TechSpot articles. This might be due to:</p>
+            <ul class="text-start">
+                <li>Internet connection issues</li>
+                <li>TechSpot RSS feed temporarily unavailable</li>
+                <li>RSS to JSON service rate limits</li>
+            </ul>
+            <button class="btn btn-primary mt-3" @onclick="RefreshNews">
+                🔄 Try Again
+            </button>
+        </div>
+        
+        <!-- Fallback Content -->
+        <div class="card mt-4">
+            <div class="card-body">
+                <h5>📖 About TechSpot</h5>
+                <p class="text-muted">
+                    TechSpot is a leading technology publication established in 1998, providing tech news and analysis 
+                    to computer power users, tech enthusiasts, IT decision-makers, and PC gamers. 
+                    Major topics include gaming, hardware, software, tech deals, mobile, and security.
+                </p>
+                <a href="https://www.techspot.com" target="_blank" class="btn btn-outline-primary">
+                    Visit TechSpot.com →
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Inject] public NewsService NewsService { get; set; } = default!;
+    
+    private List<NewsArticle> newsArticles = new();
+    private bool loadingNews = true;
+    private bool loadingMore = false;
+    private int currentCount = 10;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadNews();
+    }
+
+    private async Task LoadNews()
+    {
+        loadingNews = true;
+        StateHasChanged();
+        
+        var articles = await NewsService.GetTechSpotNewsAsync(currentCount);
+        if (articles != null)
+        {
+            newsArticles = articles;
+        }
+        
+        loadingNews = false;
+        StateHasChanged();
+    }
+
+    private async Task RefreshNews()
+    {
+        currentCount = 10; // Reset count
+        await LoadNews();
+    }
+
+    private async Task LoadMoreNews()
+    {
+        loadingMore = true;
+        StateHasChanged();
+        
+        currentCount += 10; // Load 10 more articles
+        var articles = await NewsService.GetTechSpotNewsAsync(currentCount);
+        if (articles != null)
+        {
+            newsArticles = articles;
+        }
+        
+        loadingMore = false;
+        StateHasChanged();
+    }
+} 

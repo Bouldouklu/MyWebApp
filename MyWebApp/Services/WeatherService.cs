@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MyWebApp.Services
 {
@@ -25,7 +26,15 @@ namespace MyWebApp.Services
                 var url = $"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&timezone=auto";
                 
                 var response = await _httpClient.GetStringAsync(url);
-                var weatherData = JsonSerializer.Deserialize<OpenMeteoResponse>(response);
+                Console.WriteLine($"Weather API Response: {response}"); // Debug log
+                
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                var weatherData = JsonSerializer.Deserialize<OpenMeteoResponse>(response, options);
                 
                 if (weatherData?.Current != null)
                 {
@@ -43,6 +52,7 @@ namespace MyWebApp.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error fetching current weather: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
             
             return null;
@@ -58,7 +68,15 @@ namespace MyWebApp.Services
                 var url = $"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min,weather_code,precipitation_sum,wind_speed_10m_max&timezone=auto&forecast_days=7";
                 
                 var response = await _httpClient.GetStringAsync(url);
-                var weatherData = JsonSerializer.Deserialize<OpenMeteoResponse>(response);
+                Console.WriteLine($"Weekly forecast API Response: {response}"); // Debug log
+                
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                var weatherData = JsonSerializer.Deserialize<OpenMeteoResponse>(response, options);
                 
                 if (weatherData?.Daily != null)
                 {
@@ -88,6 +106,7 @@ namespace MyWebApp.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error fetching weekly forecast: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
             }
             
             return null;
@@ -179,36 +198,61 @@ namespace MyWebApp.Services
     // Data models for Open-Meteo API response
     public class OpenMeteoResponse
     {
+        [JsonPropertyName("current")]
         public CurrentWeatherData? Current { get; set; }
+        
+        [JsonPropertyName("daily")]
         public DailyWeatherData? Daily { get; set; }
     }
 
     public class CurrentWeatherData
     {
+        [JsonPropertyName("temperature_2m")]
         public double Temperature2m { get; set; }
+        
+        [JsonPropertyName("relative_humidity_2m")]
         public int RelativeHumidity2m { get; set; }
+        
+        [JsonPropertyName("wind_speed_10m")]
         public double WindSpeed10m { get; set; }
+        
+        [JsonPropertyName("weather_code")]
         public int WeatherCode { get; set; }
     }
 
     public class DailyWeatherData
     {
+        [JsonPropertyName("time")]
         public List<string> Time { get; set; } = new();
+        
+        [JsonPropertyName("temperature_2m_max")]
         public List<double> Temperature2mMax { get; set; } = new();
+        
+        [JsonPropertyName("temperature_2m_min")]
         public List<double> Temperature2mMin { get; set; } = new();
+        
+        [JsonPropertyName("weather_code")]
         public List<int> WeatherCode { get; set; } = new();
+        
+        [JsonPropertyName("precipitation_sum")]
         public List<double> PrecipitationSum { get; set; } = new();
+        
+        [JsonPropertyName("wind_speed_10m_max")]
         public List<double> WindSpeed10mMax { get; set; } = new();
     }
 
     public class GeocodingResponse
     {
+        [JsonPropertyName("results")]
         public List<GeocodingResult>? Results { get; set; }
     }
 
     public class GeocodingResult
     {
+        [JsonPropertyName("name")]
         public string Name { get; set; } = "";
+        
+        [JsonPropertyName("country")]
         public string Country { get; set; } = "";
     }
 
