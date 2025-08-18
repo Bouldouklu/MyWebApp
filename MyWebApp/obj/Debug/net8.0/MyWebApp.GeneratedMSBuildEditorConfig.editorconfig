@@ -38,8 +38,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvTmV3cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
-[/workspaces/MyWebApp/MyWebApp/Pages/RugbyNews.razor]
-build_metadata.AdditionalFiles.TargetPath = UGFnZXMvUnVnYnlOZXdzLnJhem9y
+[/workspaces/MyWebApp/MyWebApp/Pages/Rugby.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvUnVnYnkucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [/workspaces/MyWebApp/MyWebApp/Pages/Weather.razor]

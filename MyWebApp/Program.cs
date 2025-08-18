@@ -17,4 +17,10 @@ builder.Services.AddScoped<NewsService>();
 builder.Services.AddScoped<GameDevNewsService>();
 builder.Services.AddScoped<RugbyNewsService>();
 
+// 🆕 Register the new dynamic rugby calendar service
+builder.Services.AddScoped<RugbyCalendarService>();
+
 await builder.Build().RunAsync();
+
+
+

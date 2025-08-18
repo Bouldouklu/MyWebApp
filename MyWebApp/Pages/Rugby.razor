@@ -1,0 +1,487 @@
+@page "/rugby"
+@using MyWebApp.Services
+@using static MyWebApp.Services.RugbyNewsService
+
+<PageTitle>Rugby</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>🏉 Rugby</h1>
+    <div>
+        <button class="btn btn-outline-secondary me-2" @onclick="() => ToggleView(false)" disabled="@(!showCalendar)">
+            📰 News
+        </button>
+        <button class="btn btn-outline-primary me-2" @onclick="() => ToggleView(true)" disabled="@showCalendar">
+            📅 Calendar
+        </button>
+        <button class="btn btn-outline-success" @onclick="RefreshContent" disabled="@(loadingNews || loadingMatches)">
+            @if (loadingNews || loadingMatches)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            }
+            else
+            {
+                <span>🔄</span>
+            }
+            Refresh
+        </button>
+    </div>
+</div>
+
+@if (!showCalendar)
+{
+    <!-- NEWS SECTION -->
+    <div class="alert alert-info mb-4">
+        <h6 class="alert-heading">🌍 International Rugby News</h6>
+        <p class="mb-0">International rugby news: Six Nations, Rugby Championship, World Cup, XV de France, and international test matches.</p>
+    </div>
+
+    @if (rugbyArticles?.Any() == true)
+    {
+        <div class="row">
+            @foreach (var article in rugbyArticles)
+            {
+                <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrEmpty(article.Thumbnail))
+                        {
+                            <img src="@article.Thumbnail" 
+                                 class="card-img-top" 
+                                 alt="@article.Title" 
+                                 style="height: 200px; object-fit: cover;" />
+                        }
+                        else
+                        {
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <span class="text-muted display-4">🏉</span>
+                            </div>
+                        }
+                        
+                        <div class="card-body d-flex flex-column">
+                            <div class="mb-2">
+                                <span class="badge bg-success">
+                                    @GetCategoryIcon(article.Category) @article.Category
+                                </span>
+                            </div>
+                            
+                            <h5 class="card-title">
+                                <a href="@article.Link" target="_blank" class="text-decoration-none text-dark">
+                                    @article.Title
+                                </a>
+                            </h5>
+                            
+                            <p class="card-text text-muted small flex-grow-1">
+                                @article.Description
+                            </p>
+                            
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">@GetTimeAgo(article.PublishDate)</small>
+                                    <a href="@article.Link" class="btn btn-outline-primary btn-sm" target="_blank">
+                                        Read More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (rugbyArticles.Count >= currentArticlesLoaded)
+        {
+            <div class="text-center mt-4">
+                <button class="btn btn-primary" @onclick="LoadMoreArticles" disabled="@loadingMore">
+                    @if (loadingMore)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    }
+                    Load More Articles
+                </button>
+            </div>
+        }
+    }
+    else if (loadingNews)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4>Loading rugby news...</h4>
+            <p class="text-muted">Fetching latest international rugby articles</p>
+        </div>
+    }
+    else
+    {
+        <div class="text-center my-5">
+            <div class="alert alert-warning">
+                <h4>🏉 Unable to load rugby news</h4>
+                <p>We couldn't fetch the latest rugby articles. This might be due to:</p>
+                <ul class="text-start">
+                    <li>Internet connection issues</li>
+                    <li>RSS feed temporarily unavailable</li>
+                    <li>CORS proxy limitations</li>
+                </ul>
+                <button class="btn btn-primary mt-3" @onclick="RefreshContent">
+                    🔄 Retry
+                </button>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <!-- CALENDAR SECTION -->
+    <div class="alert alert-success mb-4">
+        <h6 class="alert-heading">📅 Dynamic Rugby Calendar</h6>
+        <p class="mb-0">Live matches: Last 10 days with scores + Next 12 months scheduled. Auto-updates based on current date!</p>
+    </div>
+
+    <!-- Calendar Filter Tabs -->
+    <ul class="nav nav-pills mb-4">
+        <li class="nav-item">
+            <button class="nav-link @(calendarFilter == "all" ? "active" : "")" @onclick="@(() => SetCalendarFilter("all"))">
+                🏉 All Matches (@GetFilteredMatches("all").Count())
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(calendarFilter == "six-nations" ? "active" : "")" @onclick="@(() => SetCalendarFilter("six-nations"))">
+                🇪🇺 Six Nations (@GetFilteredMatches("six-nations").Count())
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(calendarFilter == "rugby-championship" ? "active" : "")" @onclick="@(() => SetCalendarFilter("rugby-championship"))">
+                🏆 Rugby Championship (@GetFilteredMatches("rugby-championship").Count())
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(calendarFilter == "world-cup" ? "active" : "")" @onclick="@(() => SetCalendarFilter("world-cup"))">
+                🌍 World Cup (@GetFilteredMatches("world-cup").Count())
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(calendarFilter == "champions-cup" ? "active" : "")" @onclick="@(() => SetCalendarFilter("champions-cup"))">
+                🏆 Champions Cup (@GetFilteredMatches("champions-cup").Count())
+            </button>
+        </li>
+    </ul>
+
+    @if (GetCurrentMatches().Any())
+    {
+        <div class="row">
+            @foreach (var match in GetCurrentMatches())
+            {
+                <div class="col-lg-6 col-xl-4 mb-4">
+                    <div class="card h-100 @GetMatchCardClass(match)">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <span class="badge bg-@GetCompetitionColor(match.Competition)">
+                                @GetCompetitionIcon(match.Competition) @match.Competition
+                            </span>
+                            <small class="text-muted">
+                                @match.DateTime.ToString("MMM dd, HH:mm")
+                            </small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center text-center">
+                                <div class="col-4">
+                                    <div class="mb-2">
+                                        <span class="fs-2">@GetCountryFlag(match.Team1)</span>
+                                    </div>
+                                    <h6 class="mb-0">@match.Team1</h6>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fs-4 fw-bold">VS</div>
+                                    @if (!string.IsNullOrEmpty(match.Score))
+                                    {
+                                        <div class="mt-2">
+                                            <span class="badge bg-secondary">@match.Score</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-4">
+                                    <div class="mb-2">
+                                        <span class="fs-2">@GetCountryFlag(match.Team2)</span>
+                                    </div>
+                                    <h6 class="mb-0">@match.Team2</h6>
+                                </div>
+                            </div>
+                            
+                            @if (!string.IsNullOrEmpty(match.Venue))
+                            {
+                                <div class="text-center mt-3">
+                                    <small class="text-muted">
+                                        📍 @match.Venue
+                                    </small>
+                                </div>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(match.Description))
+                            {
+                                <div class="mt-2">
+                                    <small class="text-muted">@match.Description</small>
+                                </div>
+                            }
+                        </div>
+                        <div class="card-footer text-center">
+                            @if (match.DateTime > DateTime.Now)
+                            {
+                                <small class="text-success">
+                                    ⏰ @GetTimeUntilMatch(match.DateTime)
+                                </small>
+                            }
+                            else if (!string.IsNullOrEmpty(match.Score))
+                            {
+                                <small class="text-primary">
+                                    ✅ Final Score: @match.Score
+                                </small>
+                            }
+                            else
+                            {
+                                <small class="text-secondary">
+                                    ✅ Match completed
+                                </small>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else if (loadingMatches)
+    {
+        <div class="text-center my-5">
+            <div class="spinner-border mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h4>Loading rugby calendar...</h4>
+            <p class="text-muted">Fetching upcoming international matches</p>
+        </div>
+    }
+    else
+    {
+        <div class="text-center my-5">
+            <div class="alert alert-info">
+                <h5>📅 No matches found</h5>
+                <p>No matches found for the selected filter. Try selecting a different competition or check back later.</p>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Inject] public RugbyNewsService RugbyNewsService { get; set; } = default!;
+    [Inject] public RugbyCalendarService RugbyCalendarService { get; set; } = default!;
+    
+    private List<RugbyArticle> rugbyArticles = new();
+    private List<MyWebApp.Services.RugbyMatch> rugbyMatches = new();
+    private bool loadingNews = true;
+    private bool loadingMatches = true;
+    private bool loadingMore = false;
+    private bool showCalendar = false;
+    private string calendarFilter = "all";
+    private int articlesPerLoad = 20;
+    private int currentArticlesLoaded = 20;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadRugbyNews();
+        await LoadRugbyMatches();
+    }
+
+    private void ToggleView(bool isCalendar)
+    {
+        showCalendar = isCalendar;
+    }
+
+    private async Task RefreshContent()
+    {
+        if (showCalendar)
+        {
+            await LoadRugbyMatches();
+        }
+        else
+        {
+            currentArticlesLoaded = articlesPerLoad;
+            await LoadRugbyNews();
+        }
+    }
+
+    private async Task LoadRugbyNews()
+    {
+        loadingNews = true;
+        StateHasChanged();
+        
+        try
+        {
+            Console.WriteLine("Starting to load international rugby news...");
+            var articles = await RugbyNewsService.GetInternationalRugbyNewsAsync(currentArticlesLoaded);
+            Console.WriteLine($"Received {articles?.Count ?? 0} international rugby articles");
+            
+            if (articles != null)
+            {
+                rugbyArticles = articles;
+                Console.WriteLine("International rugby news loaded successfully");
+            }
+            else
+            {
+                Console.WriteLine("Rugby articles was null");
+                rugbyArticles = new List<RugbyArticle>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading rugby news: {ex.Message}");
+            rugbyArticles = new List<RugbyArticle>();
+        }
+        finally
+        {
+            loadingNews = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadMoreArticles()
+    {
+        loadingMore = true;
+        StateHasChanged();
+        
+        currentArticlesLoaded += articlesPerLoad;
+        
+        try
+        {
+            var articles = await RugbyNewsService.GetInternationalRugbyNewsAsync(currentArticlesLoaded);
+            if (articles != null)
+            {
+                rugbyArticles = articles;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading more rugby articles: {ex.Message}");
+        }
+        finally
+        {
+            loadingMore = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadRugbyMatches()
+    {
+        loadingMatches = true;
+        StateHasChanged();
+        
+        try
+        {
+            Console.WriteLine("Loading dynamic rugby calendar...");
+            rugbyMatches = await RugbyCalendarService.GetDynamicRugbyCalendarAsync();
+            Console.WriteLine($"Loaded {rugbyMatches.Count} rugby matches");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading rugby matches: {ex.Message}");
+            rugbyMatches = new List<MyWebApp.Services.RugbyMatch>();
+        }
+        finally
+        {
+            loadingMatches = false;
+            StateHasChanged();
+        }
+    }
+
+    private void SetCalendarFilter(string filter)
+    {
+        calendarFilter = filter;
+    }
+
+    private List<MyWebApp.Services.RugbyMatch> GetFilteredMatches(string filter)
+    {
+        return filter switch
+        {
+            "six-nations" => rugbyMatches.Where(m => m.Competition.Contains("Six Nations")).ToList(),
+            "rugby-championship" => rugbyMatches.Where(m => m.Competition.Contains("Rugby Championship")).ToList(),
+            "world-cup" => rugbyMatches.Where(m => m.Competition.Contains("World Cup")).ToList(),
+            "champions-cup" => rugbyMatches.Where(m => m.Competition.Contains("Champions Cup")).ToList(),
+            _ => rugbyMatches
+        };
+    }
+
+    private List<MyWebApp.Services.RugbyMatch> GetCurrentMatches()
+    {
+        return GetFilteredMatches(calendarFilter).OrderBy(m => m.DateTime).ToList();
+    }
+
+    private string GetMatchCardClass(MyWebApp.Services.RugbyMatch match)
+    {
+        if (match.DateTime < DateTime.Now)
+            return "border-secondary";
+        
+        var daysUntil = (match.DateTime - DateTime.Now).Days;
+        return daysUntil <= 7 ? "border-warning" : "border-success";
+    }
+
+    private string GetCompetitionColor(string competition)
+    {
+        return competition switch
+        {
+            var c when c.Contains("Six Nations") => "primary",
+            var c when c.Contains("Rugby Championship") => "warning",
+            var c when c.Contains("World Cup") => "success",
+            var c when c.Contains("Champions Cup") => "info",
+            _ => "secondary"
+        };
+    }
+
+    private string GetCompetitionIcon(string competition)
+    {
+        return competition switch
+        {
+            var c when c.Contains("Six Nations") => "🇪🇺",
+            var c when c.Contains("Rugby Championship") => "🏆",
+            var c when c.Contains("World Cup") => "🌍",
+            var c when c.Contains("Champions Cup") => "🏆",
+            _ => "🏉"
+        };
+    }
+
+    private string GetCountryFlag(string country)
+    {
+        return country.ToLower() switch
+        {
+            "france" => "🇫🇷",
+            "england" => "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+            "ireland" => "🇮🇪",
+            "scotland" => "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+            "wales" => "🏴󠁧󠁢󠁷󠁬󠁳󠁿",
+            "italy" => "🇮🇹",
+            "south africa" => "🇿🇦",
+            "new zealand" => "🇳🇿",
+            "australia" => "🇦🇺",
+            "argentina" => "🇦🇷",
+            "japan" => "🇯🇵",
+            "fiji" => "🇫🇯",
+            "samoa" => "🇼🇸",
+            "tonga" => "🇹🇴",
+            "georgia" => "🇬🇪",
+            "romania" => "🇷🇴",
+            "toulouse" => "🏉",
+            "leinster" => "🏉",
+            "la rochelle" => "🏉",
+            "leicester" => "🏉",
+            "tbd" => "❓",
+            _ => "🏉"
+        };
+    }
+
+    private string GetTimeUntilMatch(DateTime matchTime)
+    {
+        var timeSpan = matchTime - DateTime.Now;
+        
+        if (timeSpan.Days > 0)
+            return $"In {timeSpan.Days} day{(timeSpan.Days > 1 ? "s" : "")}";
+        
+        if (timeSpan.Hours > 0)
+            return $"In {timeSpan.Hours} hour{(timeSpan.Hours > 1 ? "s" : "")}";
+        
+        return "Starting soon";
+    }
+}
