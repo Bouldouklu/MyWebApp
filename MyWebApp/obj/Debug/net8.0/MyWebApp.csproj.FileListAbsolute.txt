@@ -406,6 +406,8 @@
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/_framework/System.Xml.XPath.wasm.gz
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/_framework/System.Reflection.DispatchProxy.wasm.gz
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/_framework/blazor.boot.json.gz
+/workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/service-worker-assets.js
+/workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/service-worker.js
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/MyWebApp.staticwebassets.runtime.json
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/MyWebApp.dll
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/MyWebApp.pdb
@@ -1025,12 +1027,10 @@
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/compressed/5p1flbwbw4.gz
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/compressed/p2f8qgepoa.gz
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/compressed/zut9de47ww.gz
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker/service-worker.js
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker-assets.js.build
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.csproj.Up2Date
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.dll
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/refint/MyWebApp.dll
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.pdb
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/ref/MyWebApp.dll
-/workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/service-worker-assets.js
-/workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/service-worker.js
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker/service-worker.js
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/service-worker-assets.js.build

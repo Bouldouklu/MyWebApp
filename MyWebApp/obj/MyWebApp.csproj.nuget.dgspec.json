@@ -52,12 +52,6 @@
               "target": "Package",
               "version": "[8.0.18, )"
             },
-            "Microsoft.NET.ILLink.Tasks": {
-              "suppressParent": "All",
-              "target": "Package",
-              "version": "[8.0.18, )",
-              "autoReferenced": true
-            },
             "Microsoft.NET.Sdk.WebAssembly.Pack": {
               "suppressParent": "All",
               "target": "Package",

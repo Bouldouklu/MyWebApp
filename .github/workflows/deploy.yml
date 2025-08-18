@@ -38,7 +38,8 @@ jobs:
           -c Release \
           -o ./publish \
           --nologo \
-          -p:GHPages=true
+          -p:PublishTrimmed=false \
+          -p:TrimMode=partial
 
     - name: Fix Base Href for GitHub Pages
       run: |
