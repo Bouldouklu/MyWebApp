@@ -15,5 +15,6 @@ builder.Services.AddSingleton<CoffeeService>();
 builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<NewsService>();
 builder.Services.AddScoped<GameDevNewsService>();
+builder.Services.AddScoped<RugbyNewsService>();
 
 await builder.Build().RunAsync();
