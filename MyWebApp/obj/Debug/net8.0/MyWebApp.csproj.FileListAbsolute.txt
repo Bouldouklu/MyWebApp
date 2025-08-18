@@ -1,3 +1,10 @@
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.csproj.AssemblyReference.cache
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.GeneratedMSBuildEditorConfig.editorconfig
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.AssemblyInfoInputs.cache
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.AssemblyInfo.cs
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.csproj.CoreCompileInputs.cache
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.MvcApplicationPartsAssemblyInfo.cache
+/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.sourcelink.json
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/_framework/blazor.boot.json
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/_framework/blazor.webassembly.js
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/wwwroot/_framework/dotnet.js
@@ -611,13 +618,6 @@
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/icudt_CJK.dat
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/icudt_EFIGS.dat
 /workspaces/MyWebApp/MyWebApp/bin/Debug/net8.0/icudt_no_CJK.dat
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.csproj.AssemblyReference.cache
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.GeneratedMSBuildEditorConfig.editorconfig
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.AssemblyInfoInputs.cache
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.AssemblyInfo.cs
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.csproj.CoreCompileInputs.cache
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.MvcApplicationPartsAssemblyInfo.cache
-/workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/MyWebApp.sourcelink.json
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/webcil/Microsoft.AspNetCore.Authorization.wasm
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/webcil/Microsoft.AspNetCore.Components.wasm
 /workspaces/MyWebApp/MyWebApp/obj/Debug/net8.0/webcil/Microsoft.AspNetCore.Components.Forms.wasm
