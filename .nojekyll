@@ -1,0 +1,3 @@
+# This file tells GitHub Pages not to process files with Jekyll
+# This is important for Blazor WASM because it uses folders that start with underscores (_framework)
+# which Jekyll would otherwise ignore

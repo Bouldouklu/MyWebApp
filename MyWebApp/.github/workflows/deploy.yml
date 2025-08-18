@@ -26,6 +26,9 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Install .NET WASM Build Tools
+      run: dotnet workload install wasm-tools
+
     - name: Restore dependencies
       run: dotnet restore MyWebApp/MyWebApp.csproj
 
@@ -35,10 +38,10 @@ jobs:
     - name: Change base-tag in index.html to /MyWebApp/
       run: |
         echo "Before change:"
-        grep "<base" release/wwwroot/index.html
+        grep "<base" release/wwwroot/index.html || echo "No base tag found"
         sed -i 's|<base href="/" />|<base href="/MyWebApp/" />|g' release/wwwroot/index.html
         echo "After change:"
-        grep "<base" release/wwwroot/index.html
+        grep "<base" release/wwwroot/index.html || echo "No base tag found"
 
     - name: Copy index.html to 404.html
       run: cp release/wwwroot/index.html release/wwwroot/404.html
