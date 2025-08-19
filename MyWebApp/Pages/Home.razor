@@ -8,6 +8,58 @@
 
 <p>Track your daily coffee consumption and check your game dev news.</p>
 
+<!-- Today's Weather Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">🌤️ Today's Weather</h5>
+                <a href="/weather" class="btn btn-outline-primary btn-sm">7-Day Forecast</a>
+            </div>
+            <div class="card-body">
+                @if (loadingWeather)
+                {
+                    <div class="d-flex align-items-center">
+                        <div class="spinner-border spinner-border-sm me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span>Loading weather...</span>
+                    </div>
+                }
+                else if (currentWeather != null)
+                {
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center">
+                            <div class="display-4 mb-2">@WeatherService.GetWeatherIcon(currentWeather.WeatherCode)</div>
+                            <h4 class="mb-0">@Math.Round(currentWeather.Temperature, 1)°C</h4>
+                            <p class="text-muted small mb-0">@currentWeather.WeatherDescription</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>📍 Location:</strong> @currentWeather.Location</p>
+                            <p class="mb-2"><strong>💧 Humidity:</strong> @currentWeather.Humidity%</p>
+                            <p class="mb-0"><strong>💨 Wind:</strong> @Math.Round(currentWeather.WindSpeed, 1) km/h</p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <button class="btn btn-outline-secondary btn-sm" @onclick="RefreshWeather">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-muted text-center">
+                        <p>Weather data unavailable</p>
+                        <button class="btn btn-outline-primary btn-sm" @onclick="LoadWeatherData">
+                            🔄 Try Again
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-md-8">
         <div class="card">
@@ -213,15 +265,21 @@
 @code {
     [Inject] public CoffeeService CoffeeService { get; set; } = default!;
     [Inject] public GameDevNewsService GameDevNewsService { get; set; } = default!;
+    [Inject] public WeatherService WeatherService { get; set; } = default!;
     
     private CoffeeEntry newCoffeeEntry = new();
     private bool lastEntryAdded = false;
     private bool loadingGameDevNews = true;
+    private bool loadingWeather = true;
     private List<GameDevArticle>? latestGameDevNews;
+    private CurrentWeather? currentWeather;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadLatestGameDevNews();
+        await Task.WhenAll(
+            LoadLatestGameDevNews(),
+            LoadWeatherData()
+        );
     }
 
     private async Task LoadLatestGameDevNews()
@@ -309,5 +367,28 @@
             "Game Developer" => "info",
             _ => "secondary"
         };
+    }
+
+    private async Task LoadWeatherData()
+    {
+        try
+        {
+            loadingWeather = true;
+            currentWeather = await WeatherService.GetCurrentWeatherAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading weather data: {ex.Message}");
+        }
+        finally
+        {
+            loadingWeather = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshWeather()
+    {
+        await LoadWeatherData();
     }
 }
