@@ -9,10 +9,10 @@ namespace MyWebApp.Services
         private readonly HttpClient _httpClient;
         private List<CoffeeEntry> _coffeeEntries = new();
 
-        // 🆕 JSONBin Configuration - loaded from environment variables
-        private readonly string _binId;
-        private readonly string _apiKey;
-        private readonly string _jsonBinUrl;
+        // 🆕 JSONBin Configuration - TEMPORARILY HARDCODED (replace with your values)
+        private const string BinId = "68a4787b43b1c97be92280ec "; // Replace with your actual Bin ID
+        private const string ApiKey = "$2a$10$IA/QYq7xGJ9sF2BPhWRUDOHuqMeltfstCs5JXWgJVcpCQ1BxoClry"; // Replace with your actual API key
+        private const string JsonBinUrl = $"https://api.jsonbin.io/v3/b/{BinId}";
 
         public event Action? OnCoffeeListChanged;
 
@@ -21,16 +21,8 @@ namespace MyWebApp.Services
         {
             _httpClient = httpClient;
             
-            // Get values from environment variables (set in Codespace Secrets)
-            _binId = Environment.GetEnvironmentVariable("JSONBIN_BIN_ID") 
-                     ?? throw new InvalidOperationException("JSONBIN_BIN_ID environment variable not set");
-            _apiKey = Environment.GetEnvironmentVariable("JSONBIN_API_KEY") 
-                      ?? throw new InvalidOperationException("JSONBIN_API_KEY environment variable not set");
-            
-            _jsonBinUrl = $"https://api.jsonbin.io/v3/b/{_binId}";
-            
             // Set up JSONBin headers
-            _httpClient.DefaultRequestHeaders.Add("X-Master-Key", _apiKey);
+            _httpClient.DefaultRequestHeaders.Add("X-Master-Key", ApiKey);
             _httpClient.DefaultRequestHeaders.Add("X-Bin-Meta", "false");
         }
 
@@ -83,7 +75,7 @@ namespace MyWebApp.Services
                 });
                 
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PutAsync(_jsonBinUrl, content);
+                var response = await _httpClient.PutAsync(JsonBinUrl, content);
                 
                 return response.IsSuccessStatusCode;
             }
@@ -99,7 +91,7 @@ namespace MyWebApp.Services
         {
             try
             {
-                var response = await _httpClient.GetStringAsync($"{_jsonBinUrl}/latest");
+                var response = await _httpClient.GetStringAsync($"{JsonBinUrl}/latest");
                 var entries = JsonSerializer.Deserialize<List<CoffeeEntry>>(response);
                 
                 if (entries != null)
