@@ -1,0 +1,23 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+*.user
+*.suo
+
+# Visual Studio Code
+.vscode/
+.vs/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Any future config files with secrets
+appsettings.*.json
+secrets.json

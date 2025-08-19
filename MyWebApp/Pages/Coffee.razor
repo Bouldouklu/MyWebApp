@@ -1,6 +1,7 @@
 @page "/coffee"
 @using System.ComponentModel.DataAnnotations
 @using MyWebApp.Services
+@implements IDisposable
 
 <PageTitle>Coffee Log</PageTitle>
 
@@ -159,6 +160,33 @@ else
             <p><strong>Average brew time:</strong> @TimeSpan.FromSeconds(coffeeEntries.Average(c => c.TotalBrewTimeSeconds)).ToString(@"m\:ss")</p>
         }
     </div>
+
+    <div class="mt-4">
+        <h5>☁️ Cloud Sync</h5>
+        <div class="btn-group" role="group">
+            <button class="btn btn-primary" @onclick="SaveToCloud" disabled="@isSaving">
+                @if (isSaving)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                💾 Save to Cloud
+            </button>
+            <button class="btn btn-success" @onclick="LoadFromCloud" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                📥 Load from Cloud
+            </button>
+        </div>
+        
+        @if (!string.IsNullOrEmpty(syncMessage))
+        {
+            <div class="alert @(syncSuccess ? "alert-success" : "alert-danger") mt-2">
+                @syncMessage
+            </div>
+        }
+    </div>
 }
 
 @code {
@@ -166,6 +194,12 @@ else
     
     private CoffeeEntry newCoffeeEntry = new();
     private List<CoffeeEntry> coffeeEntries = new();
+    
+    // Cloud sync variables
+    private bool isSaving = false;
+    private bool isLoading = false;
+    private string syncMessage = "";
+    private bool syncSuccess = false;
 
     protected override void OnInitialized()
     {
@@ -224,6 +258,72 @@ else
                entry.GrindSetting >= 8 && entry.GrindSetting <= 24 &&
                entry.BrewTimeMinutes >= 0 && entry.BrewTimeMinutes <= 59 &&
                entry.BrewTimeSeconds >= 0 && entry.BrewTimeSeconds <= 59;
+    }
+
+    // Cloud sync methods
+    private async Task SaveToCloud()
+    {
+        isSaving = true;
+        syncMessage = "";
+        StateHasChanged();
+        
+        try
+        {
+            var success = await CoffeeService.SaveToCloudAsync();
+            syncSuccess = success;
+            syncMessage = success ? "✅ Saved to cloud successfully!" : "❌ Failed to save to cloud";
+        }
+        catch (Exception ex)
+        {
+            syncSuccess = false;
+            syncMessage = $"❌ Error: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
+            
+            // Clear message after 3 seconds
+            _ = Task.Delay(3000).ContinueWith(_ => {
+                syncMessage = "";
+                InvokeAsync(StateHasChanged);
+            });
+        }
+    }
+
+    private async Task LoadFromCloud()
+    {
+        isLoading = true;
+        syncMessage = "";
+        StateHasChanged();
+        
+        try
+        {
+            var success = await CoffeeService.LoadFromCloudAsync();
+            syncSuccess = success;
+            syncMessage = success ? "✅ Loaded from cloud successfully!" : "❌ Failed to load from cloud";
+            
+            if (success)
+            {
+                RefreshCoffeeList();
+            }
+        }
+        catch (Exception ex)
+        {
+            syncSuccess = false;
+            syncMessage = $"❌ Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+            
+            // Clear message after 3 seconds
+            _ = Task.Delay(3000).ContinueWith(_ => {
+                syncMessage = "";
+                InvokeAsync(StateHasChanged);
+            });
+        }
     }
 
     public void Dispose()

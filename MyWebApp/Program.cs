@@ -11,7 +11,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 // Register services with proper lifetimes
-builder.Services.AddSingleton<CoffeeService>();
+builder.Services.AddScoped<CoffeeService>();
 builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<NewsService>();
 builder.Services.AddScoped<GameDevNewsService>();

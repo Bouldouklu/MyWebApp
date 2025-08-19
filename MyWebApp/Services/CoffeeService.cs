@@ -1,12 +1,38 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text;
+using System.Text.Json;
 
 namespace MyWebApp.Services
 {
     public class CoffeeService
     {
+        private readonly HttpClient _httpClient;
         private List<CoffeeEntry> _coffeeEntries = new();
 
+        // 🆕 JSONBin Configuration - loaded from environment variables
+        private readonly string _binId;
+        private readonly string _apiKey;
+        private readonly string _jsonBinUrl;
+
         public event Action? OnCoffeeListChanged;
+
+        // 🆕 Add HttpClient injection
+        public CoffeeService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+            
+            // Get values from environment variables (set in Codespace Secrets)
+            _binId = Environment.GetEnvironmentVariable("JSONBIN_BIN_ID") 
+                     ?? throw new InvalidOperationException("JSONBIN_BIN_ID environment variable not set");
+            _apiKey = Environment.GetEnvironmentVariable("JSONBIN_API_KEY") 
+                      ?? throw new InvalidOperationException("JSONBIN_API_KEY environment variable not set");
+            
+            _jsonBinUrl = $"https://api.jsonbin.io/v3/b/{_binId}";
+            
+            // Set up JSONBin headers
+            _httpClient.DefaultRequestHeaders.Add("X-Master-Key", _apiKey);
+            _httpClient.DefaultRequestHeaders.Add("X-Bin-Meta", "false");
+        }
 
         public void AddCoffee(CoffeeEntry entry)
         {
@@ -44,6 +70,52 @@ namespace MyWebApp.Services
         public double GetAverageRating()
         {
             return _coffeeEntries.Count > 0 ? _coffeeEntries.Average(c => c.Rating) : 0;
+        }
+
+        // 🆕 NEW METHOD: Save to JSONBin
+        public async Task<bool> SaveToCloudAsync()
+        {
+            try
+            {
+                var json = JsonSerializer.Serialize(_coffeeEntries, new JsonSerializerOptions
+                {
+                    WriteIndented = true
+                });
+                
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PutAsync(_jsonBinUrl, content);
+                
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving to cloud: {ex.Message}");
+                return false;
+            }
+        }
+
+        // 🆕 NEW METHOD: Load from JSONBin
+        public async Task<bool> LoadFromCloudAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetStringAsync($"{_jsonBinUrl}/latest");
+                var entries = JsonSerializer.Deserialize<List<CoffeeEntry>>(response);
+                
+                if (entries != null)
+                {
+                    _coffeeEntries = entries;
+                    OnCoffeeListChanged?.Invoke();
+                    return true;
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error loading from cloud: {ex.Message}");
+                return false;
+            }
         }
     }
 
