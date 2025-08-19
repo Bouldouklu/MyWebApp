@@ -41,6 +41,28 @@ jobs:
           -p:PublishTrimmed=false \
           -p:TrimMode=partial
 
+    # 🆕 DEBUG: Check if CSS files are generated
+    - name: Debug CSS Files
+      run: |
+        echo "=== Checking for CSS files in publish output ==="
+        find ./publish -name "*.css" -type f
+        echo ""
+        echo "=== Contents of wwwroot directory ==="
+        ls -la ./publish/wwwroot/ || echo "wwwroot not found"
+        echo ""
+        echo "=== Checking for MyWebApp.styles.css specifically ==="
+        if [ -f "./publish/wwwroot/MyWebApp.styles.css" ]; then
+          echo "✅ MyWebApp.styles.css found!"
+          echo "File size: $(stat -c%s "./publish/wwwroot/MyWebApp.styles.css") bytes"
+          echo "First 500 characters:"
+          head -c 500 "./publish/wwwroot/MyWebApp.styles.css"
+        else
+          echo "❌ MyWebApp.styles.css NOT found!"
+        fi
+        echo ""
+        echo "=== Checking for _content directory (sometimes CSS is here) ==="
+        find ./publish -path "*/_content/*" -name "*.css" -type f || echo "No _content CSS files found"
+
     - name: Fix Base Href for GitHub Pages
       run: |
         # Ensure the base href is set correctly for GitHub Pages
