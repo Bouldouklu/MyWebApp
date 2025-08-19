@@ -1,6 +1,18 @@
 ## 🛠️ Technology Stack# MyWebApp
 
-A feature-rich Blazor WebAssembly application built with .NET 8, providing a modern single-page application experience with multiple productivity and information tools.
+A personal learning project built with Blazor WebAssembly - my journey into modern web development, GitHub workflows, and AI-assisted coding tools.
+
+## 🎯 About This Project
+
+This is a **hobbyist learning project** where I'm exploring and experimenting with:
+- **GitHub & Version Control**: Learning Git workflows, branching, and collaboration
+- **GitHub Codespaces**: Cloud-based development environments
+- **Claude AI**: AI-assisted coding and problem-solving
+- **Claude Code**: Command-line AI coding tools
+- **Blazor WebAssembly**: Modern .NET web development
+- **Full-stack development**: From UI to services and data management
+
+This application serves as my playground for trying new technologies, patterns, and tools while building something functional and fun!
 
 ## 🚀 Features
 
@@ -40,15 +52,17 @@ A feature-rich Blazor WebAssembly application built with .NET 8, providing a mod
 
 ## 🚧 Development Status
 
+### Learning Focus Areas
+
 ### Pages Under Development
 
-- **🏉 Rugby Calendar**: Match placeholders are working, but live API integration for actual past, current, and future match data is still in progress
-- **📋 Todo List**: Fully functional locally but data is stored in browser memory only - no persistent storage implemented yet
-- **☕ Coffee Log**: Fully functional locally but data is stored in browser memory only - no persistent storage implemented yet
+- **🏉 Rugby Calendar**: Match placeholders are working, but live API integration for actual past, current, and future match data is still in progress *(Learning: External API integration)*
+- **📋 Todo List**: Fully functional locally but data is stored in browser memory only - no persistent storage implemented yet *(Learning: Local storage and state management)*
+- **☕ Coffee Log**: Fully functional locally but data is stored in browser memory only - no persistent storage implemented yet *(Learning: Data persistence patterns)*
 
 ### Completed Features
-- **🌤️ Weather Information**: Fully functional
-- **📰 News Feeds**: Fully functional with live data feeds
+- **🌤️ Weather Information**: Fully functional *(Learned: Service injection and HTTP clients)*
+- **📰 News Feeds**: Fully functional with live data feeds *(Learned: RSS parsing and data transformation)*
 
 - **Framework**: Blazor WebAssembly (.NET 8)
 - **UI Framework**: Bootstrap 5
@@ -157,17 +171,25 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add/update tests if applicable
-5. Submit a pull request
+This is primarily a **personal learning project**, but I welcome:
+- **Suggestions and feedback** from other developers
+- **Learning resources** and best practice recommendations  
+- **Bug reports** if you spot issues while exploring the code
 
-## 📞 Support
+Feel free to:
+1. Open issues for discussion or suggestions
+2. Share learning resources in discussions
+3. Fork the repo for your own experiments
 
-For issues and questions:
-- Create an issue in the repository
-- Check existing documentation
-- Review the CSS architecture guide
+*Note: This is a learning project, so code quality and practices are evolving as I learn!*
+
+## 📚 Learning Resources
+
+Tools and resources that have helped me build this project:
+- **Claude AI**: Code assistance, debugging help, and architecture advice
+- **Claude Code**: Command-line AI coding companion
+- **GitHub Codespaces**: Cloud development environment
 
 ---
+
+Built with ❤️ and lots of learning using Blazor WebAssembly, Claude AI, and GitHub Codespaces
