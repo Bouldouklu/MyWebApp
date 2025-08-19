@@ -20,7 +20,7 @@ builder.Services.AddScoped<RugbyNewsService>();
 // 🆕 Register the new dynamic rugby calendar service
 builder.Services.AddScoped<RugbyCalendarService>();
 
+// 🆕 Register the Todo service
+builder.Services.AddSingleton<TodoService>();
+
 await builder.Build().RunAsync();
-
-
-

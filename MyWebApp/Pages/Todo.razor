@@ -1,0 +1,288 @@
+@page "/todo"
+@using MyWebApp.Models
+@using MyWebApp.Services
+@using System.ComponentModel.DataAnnotations
+@inject TodoService TodoService
+@implements IDisposable
+
+<PageTitle>Todo List</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="bi bi-check2-square"></i> Todo List
+            </h1>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-primary">@stats.Total</h5>
+                    <p class="card-text text-muted">Total Tasks</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-info">@stats.Active</h5>
+                    <p class="card-text text-muted">Active</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-success">@stats.Completed</h5>
+                    <p class="card-text text-muted">Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <h5 class="card-title text-danger">@stats.Overdue</h5>
+                    <p class="card-text text-muted">Overdue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Add New Todo Card -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-plus-circle"></i> Add New Todo
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@newTodo" OnValidSubmit="@AddNewTodo">
+                        <DataAnnotationsValidator />
+                        
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Title *</label>
+                            <InputText id="title" class="form-control" @bind-Value="newTodo.Title" placeholder="Enter todo title..." />
+                            <ValidationMessage For="@(() => newTodo.Title)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <InputTextArea id="description" class="form-control" @bind-Value="newTodo.Description" 
+                                         rows="3" placeholder="Enter description (optional)..." />
+                            <ValidationMessage For="@(() => newTodo.Description)" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="deadline" class="form-label">Deadline (Optional)</label>
+                            <InputDate id="deadline" class="form-control" @bind-Value="newTodo.Deadline" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus"></i> Add Todo
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+
+        <!-- Todo Lists -->
+        <div class="col-lg-8">
+            <!-- Filter Tabs -->
+            <ul class="nav nav-tabs mb-3">
+                <li class="nav-item">
+                    <a class="nav-link @(currentFilter == TodoFilter.All ? "active" : "")" 
+                       href="#" @onclick="@(() => SetFilter(TodoFilter.All))" @onclick:preventDefault="true">
+                        All (@stats.Total)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(currentFilter == TodoFilter.Active ? "active" : "")" 
+                       href="#" @onclick="@(() => SetFilter(TodoFilter.Active))" @onclick:preventDefault="true">
+                        Active (@stats.Active)
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(currentFilter == TodoFilter.Completed ? "active" : "")" 
+                       href="#" @onclick="@(() => SetFilter(TodoFilter.Completed))" @onclick:preventDefault="true">
+                        Completed (@stats.Completed)
+                    </a>
+                </li>
+                @if (stats.Overdue > 0)
+                {
+                    <li class="nav-item">
+                        <a class="nav-link text-danger @(currentFilter == TodoFilter.Overdue ? "active" : "")" 
+                           href="#" @onclick="@(() => SetFilter(TodoFilter.Overdue))" @onclick:preventDefault="true">
+                            Overdue (@stats.Overdue)
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <!-- Todo Items -->
+            <div class="todo-list">
+                @if (filteredTodos.Any())
+                {
+                    @foreach (var todo in filteredTodos)
+                    {
+                        <div class="card mb-3 @(todo.IsCompleted ? "border-success" : "")">
+                            <div class="card-body">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   checked="@todo.IsCompleted" 
+                                                   @onchange="@(() => ToggleComplete(todo.Id))" />
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <h6 class="mb-1 @todo.GetPriorityClass() @(todo.IsCompleted ? "text-decoration-line-through" : "")">
+                                            @todo.Title
+                                        </h6>
+                                        @if (!string.IsNullOrEmpty(todo.Description))
+                                        {
+                                            <p class="mb-1 text-muted small @(todo.IsCompleted ? "text-decoration-line-through" : "")">
+                                                @todo.Description
+                                            </p>
+                                        }
+                                        <div class="d-flex align-items-center gap-3">
+                                            <small class="text-muted">
+                                                <i class="bi bi-calendar-plus"></i> 
+                                                Created: @todo.CreatedAt.ToString("MMM dd, yyyy")
+                                            </small>
+                                            @if (todo.Deadline.HasValue)
+                                            {
+                                                <small class="@(todo.IsOverdue ? "text-danger" : "text-warning")">
+                                                    <i class="bi bi-alarm"></i> 
+                                                    Due: @todo.Deadline.Value.ToString("MMM dd, yyyy")
+                                                    @if (todo.IsOverdue)
+                                                    {
+                                                        <span class="badge bg-danger ms-1">OVERDUE</span>
+                                                    }
+                                                </small>
+                                            }
+                                            @if (todo.IsCompleted && todo.CompletedAt.HasValue)
+                                            {
+                                                <small class="text-success">
+                                                    <i class="bi bi-check-circle"></i> 
+                                                    Completed: @todo.CompletedAt.Value.ToString("MMM dd, yyyy")
+                                                </small>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <button class="btn btn-outline-danger btn-sm" 
+                                                @onclick="@(() => DeleteTodo(todo.Id))"
+                                                title="Delete todo">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-center py-5">
+                        <i class="bi bi-inbox display-4 text-muted"></i>
+                        <h5 class="mt-3 text-muted">
+                            @if (currentFilter == TodoFilter.All)
+                            {
+                                @:No todos yet
+                            }
+                            else if (currentFilter == TodoFilter.Active)
+                            {
+                                @:No active todos
+                            }
+                            else if (currentFilter == TodoFilter.Completed)
+                            {
+                                @:No completed todos
+                            }
+                            else if (currentFilter == TodoFilter.Overdue)
+                            {
+                                @:No overdue todos
+                            }
+                        </h5>
+                        @if (currentFilter == TodoFilter.All)
+                        {
+                            <p class="text-muted">Create your first todo using the form on the left!</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private TodoItem newTodo = new TodoItem();
+    private List<TodoItem> filteredTodos = new List<TodoItem>();
+    private TodoStats stats = new TodoStats();
+    private TodoFilter currentFilter = TodoFilter.Active;
+
+    public enum TodoFilter
+    {
+        All,
+        Active,
+        Completed,
+        Overdue
+    }
+
+    protected override void OnInitialized()
+    {
+        TodoService.OnTodosChanged += UpdateTodos;
+        UpdateTodos();
+    }
+
+    private void UpdateTodos()
+    {
+        stats = TodoService.GetStats();
+        ApplyFilter();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SetFilter(TodoFilter filter)
+    {
+        currentFilter = filter;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        filteredTodos = currentFilter switch
+        {
+            TodoFilter.All => TodoService.GetAllTodos(),
+            TodoFilter.Active => TodoService.GetActiveTodos(),
+            TodoFilter.Completed => TodoService.GetCompletedTodos(),
+            TodoFilter.Overdue => TodoService.GetOverdueTodos(),
+            _ => TodoService.GetAllTodos()
+        };
+    }
+
+    private void AddNewTodo()
+    {
+        TodoService.AddTodo(newTodo);
+        newTodo = new TodoItem(); // Reset form
+    }
+
+    private void ToggleComplete(int id)
+    {
+        TodoService.ToggleTodoComplete(id);
+    }
+
+    private void DeleteTodo(int id)
+    {
+        TodoService.DeleteTodo(id);
+    }
+
+    public void Dispose()
+    {
+        TodoService.OnTodosChanged -= UpdateTodos;
+    }
+}
